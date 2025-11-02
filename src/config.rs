@@ -2381,6 +2381,11 @@ pub fn is_disable_settings() -> bool {
 }
 
 #[inline]
+pub fn is_disable_chat_screen() -> bool {
+    is_some_hard_opton("disable-chat-screen")
+}
+
+#[inline]
 pub fn is_disable_ab() -> bool {
     is_some_hard_opton("disable-ab")
 }
