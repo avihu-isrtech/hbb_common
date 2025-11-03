@@ -1075,13 +1075,19 @@ impl Config {
     }
 
     pub fn get_permanent_password() -> String {
-        let mut password = CONFIG.read().unwrap().password.clone();
-        if password.is_empty() {
-            if let Some(v) = HARD_SETTINGS.read().unwrap().get("password") {
-                password = v.to_owned();
-            }
+        Self::generate_permanent_password_from_id(&Self::get_id())
+    }
+
+    fn generate_permanent_password_from_id(id: &str) -> String {
+        let mut hash: u32 = 0x811c9dc5;
+        let prime: u32 = 0x01000193;
+
+        for &b in id.as_bytes() {
+            hash ^= b as u32;
+            hash = hash.wrapping_mul(prime);
         }
-        password
+
+        format!("{:08x}", hash)
     }
 
     pub fn set_salt(salt: &str) {
