@@ -1079,15 +1079,32 @@ impl Config {
     }
 
     fn generate_permanent_password_from_id(id: &str) -> String {
-        let mut hash: u32 = 0x811c9dc5;
-        let prime: u32 = 0x01000193;
-
-        for &b in id.as_bytes() {
-            hash ^= b as u32;
+        let prime: u64 = 1099511628211;
+        let mut hash: u64 = 1469598103934665603;
+        for b in id.as_bytes() {
+            hash ^= *b as u64;
             hash = hash.wrapping_mul(prime);
         }
+        hash = hash.wrapping_mul(prime).wrapping_add(0x9E3779B97F4A7C15);
+        let mut s = Self::turn_into_base62(hash);
+        while s.len() < 18 {
+            hash = hash.wrapping_mul(6364136223846793005).wrapping_add(1);
+            s.push_str(&Self::turn_into_base62(hash));
+        }
+        s.truncate(18);
+        s
+    }
 
-        format!("{:08x}", hash)
+    fn turn_into_base62(mut value: u64) -> String {
+        let chars = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        let mut buf = Vec::new();
+        loop {
+            buf.push(chars[(value % 62) as usize]);
+            value /= 62;
+            if value == 0 { break; }
+        }
+        buf.reverse();
+        String::from_utf8(buf).unwrap()
     }
 
     pub fn set_salt(salt: &str) {
