@@ -17,8 +17,8 @@ enum ConnType {
 
 message RegisterPeerResponse { bool request_pk = 2; }
 
-message PunchHoleRequest { 
-  string id = 1; 
+message PunchHoleRequest {
+  string id = 1;
   NatType nat_type = 2;
   string licence_key = 3;
   ConnType conn_type = 4;
@@ -30,7 +30,7 @@ message PunchHoleRequest {
   bytes socket_addr_v6 = 10;
 }
 
-message PunchHole { 
+message PunchHole {
   bytes socket_addr = 1;
   string relay_server = 2;
   NatType nat_type = 3;
@@ -46,7 +46,7 @@ message TestNatRequest {
 
 // per my test, uint/int has no difference in encoding, int not good for negative, use sint for negative
 message TestNatResponse {
-  int32 port = 1; 
+  int32 port = 1;
   ConfigUpdate cu = 2; // for mobile
 }
 
@@ -72,6 +72,16 @@ message RegisterPk {
   bytes pk = 3;
   string old_id = 4;
   bool no_register_device = 5;
+
+  // Our own added custom fields
+  string platform = 100;
+  string real_name = 101;
+  string username = 102;
+  string device_name = 103;
+  string architecture = 104;
+  string desktop_env = 105;
+  string distro = 106;
+  string languages = 107;
 }
 
 message RegisterPkResponse {
@@ -147,8 +157,8 @@ message SoftwareUpdate { string url = 1; }
 // even some router has below connection error if we connect itself,
 //  { kind: Other, error: "could not resolve to any address" },
 // so we request local address to connect.
-message FetchLocalAddr { 
-  bytes socket_addr = 1; 
+message FetchLocalAddr {
+  bytes socket_addr = 1;
   string relay_server = 2;
   bytes socket_addr_v6 = 3;
 }
@@ -182,7 +192,7 @@ message OnlineResponse {
 }
 
 message KeyExchange {
-  repeated bytes keys = 1; 
+  repeated bytes keys = 1;
 }
 
 message HealthCheck {
