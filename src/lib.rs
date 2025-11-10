@@ -305,10 +305,17 @@ pub fn get_exe_time() -> SystemTime {
 }
 
 pub fn get_uuid() -> Vec<u8> {
+    let fixed_uuid = Config::get_option("fixed-uuid");
+    if !fixed_uuid.is_empty() {
+        return fixed_uuid.into_bytes()
+    }
+
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     if let Ok(id) = machine_uid::get() {
         return id.into();
     }
+
+    // TODO -> On Android and iOS return the device unique id
     Config::get_key_pair().1
 }
 
