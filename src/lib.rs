@@ -307,7 +307,14 @@ pub fn get_exe_time() -> SystemTime {
 pub fn get_uuid() -> Vec<u8> {
     let fixed_uuid = Config::get_option("fixed-uuid");
     if !fixed_uuid.is_empty() {
-        return fixed_uuid.into_bytes()
+        return fixed_uuid.into_bytes();
+    }
+
+    #[cfg(target_os = "android")]
+    if let Some(id) = android_id() {
+        if !id.is_empty() {
+            return id;
+        }
     }
 
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
@@ -315,8 +322,31 @@ pub fn get_uuid() -> Vec<u8> {
         return id.into();
     }
 
-    // TODO -> On Android and iOS return the device unique id
+    // TODO -> On iOS return the device unique id
     Config::get_key_pair().1
+}
+
+#[cfg(target_os = "android")]
+lazy_static::lazy_static! {
+    static ref ANDROID_ID: std::sync::Mutex<Option<Vec<u8>>> = Default::default();
+}
+
+#[cfg(target_os = "android")]
+pub fn set_android_id(id: String) {
+    let mut guard = ANDROID_ID.lock().unwrap();
+    if id.is_empty() {
+        *guard = None;
+    } else {
+        *guard = Some(id.into_bytes());
+    }
+}
+
+#[cfg(target_os = "android")]
+fn android_id() -> Option<Vec<u8>> {
+    ANDROID_ID
+        .lock()
+        .ok()
+        .and_then(|guard| guard.clone())
 }
 
 #[inline]
