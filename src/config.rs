@@ -18,6 +18,7 @@ use serde_derive::{Deserialize, Serialize};
 use serde_json;
 use sodiumoxide::base64;
 use sodiumoxide::crypto::sign;
+use uuid::Uuid;
 
 use crate::{
     compress::{compress, decompress},
@@ -871,6 +872,11 @@ impl Config {
     }
 
     fn get_auto_id() -> Option<String> {
+        let auto_peer_id_mode = Config::get_option("auto-peer-id-mode");
+        if auto_peer_id_mode == "uuid" {
+            return Option::from(Uuid::new_v4().to_string());
+        }
+
         #[cfg(any(target_os = "android", target_os = "ios"))]
         {
             return Some(
