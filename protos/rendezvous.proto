@@ -81,7 +81,9 @@ message RegisterPk {
   string architecture = 104;
   string desktop_env = 105;
   string distro = 106;
-  string languages = 107;
+  string os_version = 107;
+  string app_version = 108;
+  string languages = 109;
 }
 
 message RegisterPkResponse {
