@@ -19,6 +19,7 @@ use serde_json;
 use sodiumoxide::base64;
 use sodiumoxide::crypto::sign;
 use uuid::Uuid;
+use sha2::{Sha256, Digest};
 
 use crate::{
     compress::{compress, decompress},
@@ -871,8 +872,26 @@ impl Config {
         }
     }
 
+    fn generate_peer_id_based_on_uuid() -> String {
+        let bytes: Vec<u8> = super::get_uuid();
+        let mut hasher = Sha256::new();
+        hasher.update(&bytes);
+        let hash = hasher.finalize();
+        let b64 = base64::encode(hash, base64::Variant::Original);
+
+        b64.chars()
+            .filter(|c| c.is_ascii_alphanumeric())
+            .take(11)
+            .collect()
+    }
+
     fn get_auto_id() -> Option<String> {
         let auto_peer_id_mode = Config::get_option("auto-peer-id-mode");
+
+        if auto_peer_id_mode == "based-on-uuid" {
+            return Option::from(Self::generate_peer_id_based_on_uuid());
+        }
+
         if auto_peer_id_mode == "uuid" {
             return Option::from(Uuid::new_v4().to_string());
         }
