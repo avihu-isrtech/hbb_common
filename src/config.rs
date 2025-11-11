@@ -20,6 +20,7 @@ use sodiumoxide::base64;
 use sodiumoxide::crypto::sign;
 use uuid::Uuid;
 use sha2::{Sha256, Digest};
+use std::convert::TryInto;
 
 use crate::{
     compress::{compress, decompress},
@@ -877,12 +878,11 @@ impl Config {
         let mut hasher = Sha256::new();
         hasher.update(&bytes);
         let hash = hasher.finalize();
-        let b64 = base64::encode(hash, base64::Variant::Original);
-
-        b64.chars()
-            .filter(|c| c.is_ascii_alphanumeric())
-            .take(11)
-            .collect()
+        let num = u64::from_be_bytes(hash[0..8].try_into().unwrap());
+        let range_min = 100_000_000_000_000u64;
+        let range_max = 900_000_000_000_000u64;
+        let range = range_max - range_min;
+        ((num % range) + range_min).to_string()
     }
 
     fn get_auto_id() -> Option<String> {
